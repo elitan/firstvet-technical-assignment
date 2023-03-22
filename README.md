@@ -1,5 +1,12 @@
 # FirstVet Technical Assignment
 
+## Get Started
+
+```
+pnpm install
+pnpm start
+```
+
 ## Improvements
 
 - API

@@ -15,11 +15,11 @@ const FILE_PATH = "./data.json";
   // read the file
   const schedules = await readJsonFile(FILE_PATH);
 
-  // available slots
   const availableSlots = [];
 
+  // loop through all schedules
   for (const schedule of schedules) {
-    console.log(schedule);
+    const { scheduleId, employeeId, employeeName } = schedule;
 
     // get start and end date and time in correct formats
     const scheduleStartAt = parseISO(
@@ -27,50 +27,50 @@ const FILE_PATH = "./data.json";
     );
     const scheduleEndAt = parseISO(`${schedule.endDate}T${schedule.endTime}`);
 
-    // console.log(format(scheduleStartAt, "yyyy-MM-dd", { locale: sv }));
-    // console.log(format(scheduleEndAt, "yyyy-MM-dd", { locale: sv }));
-
-    console.log(format(scheduleStartAt, "yyyy-MM-dd HH:mm "));
-    console.log(format(scheduleEndAt, "yyyy-MM-dd HH:mm"));
-
     // get all breaks
     const breaks = [];
-    for (const breakIndex of Array(NUMBER_OF_BREAKS).keys()) {
+    const ZERO_TIME = "00:00:00";
+    for (let i = 0; i < NUMBER_OF_BREAKS; i++) {
       const { externalStartBreakKey, externalEndBreakKey } =
-        getExternalBreakKeys(breakIndex);
+        getExternalBreakKeys(i);
 
+      // skip unused breaks
       if (
-        schedule[externalStartBreakKey] === "00:00:00" ||
-        schedule[externalEndBreakKey] === "00:00:00"
+        schedule[externalStartBreakKey] === ZERO_TIME ||
+        schedule[externalEndBreakKey] === ZERO_TIME
       ) {
         continue;
       }
 
+      // get correct start and end date in correct format
+      const start = parseISO(
+        `${schedule.startDate}T${schedule[externalStartBreakKey]}`
+      );
+      const end = parseISO(
+        `${schedule.endDate}T${schedule[externalEndBreakKey]}`
+      );
+
+      // add break to breaks
       breaks.push({
-        start: parseISO(
-          `${schedule.startDate}T${schedule[externalStartBreakKey]}`
-        ),
-        end: parseISO(`${schedule.endDate}T${schedule[externalEndBreakKey]}`),
+        start,
+        end,
       });
     }
 
-    console.log("available breaks:");
-    console.log(breaks);
+    // calculate available slots
+    let cursorDate = scheduleStartAt;
 
-    const availableSlots = [];
-
-    let dateCursor = scheduleStartAt;
-    while (dateCursor < scheduleEndAt) {
-      // get current slot start and end time
-      const slotStartAt = dateCursor;
-      const slotEndAt = addMinutes(dateCursor, MEETING_DURATION);
+    while (cursorDate < scheduleEndAt) {
+      // get current slot start and end date and time
+      const slotStartAt = cursorDate;
+      const slotEndAt = addMinutes(cursorDate, MEETING_DURATION);
 
       // if slot end time is after schedule end time, stop
       if (slotEndAt > scheduleEndAt) {
         break;
       }
 
-      // make sure slot doesn't overlap with any break
+      // check if slot overlaps with any break
       const overlapsWithBreak = breaks.find((breakItem) => {
         return areIntervalsOverlapping(
           { start: slotStartAt, end: slotEndAt },
@@ -80,15 +80,34 @@ const FILE_PATH = "./data.json";
 
       // if slot doesn't overlap with any break, add it to available slots
       if (!overlapsWithBreak) {
-        availableSlots.push({ start: slotStartAt, end: slotEndAt });
-        dateCursor = slotEndAt;
+        // add slot to available slots
+        availableSlots.push({
+          start: slotStartAt,
+          end: slotEndAt,
+          scheduleId,
+          employeeId,
+          employeeName,
+        });
+
+        // move cursor to end of the slot
+        cursorDate = slotEndAt;
       } else {
         // move cursor to end of the break it overlaps with
-        dateCursor = overlapsWithBreak.end;
+        cursorDate = overlapsWithBreak.end;
       }
     }
+  }
 
-    console.log("available slots:");
-    console.log(availableSlots);
+  // sort available slots by start time
+  availableSlots.sort((a, b) => a.start.getTime() - b.start.getTime());
+
+  // print available slots
+  for (const slot of availableSlots) {
+    console.log(
+      `${format(slot.start, "yyyy-MM-dd HH:mm")} - ${format(
+        slot.end,
+        "HH:mm"
+      )} ${slot.employeeName} (${slot.employeeId})`
+    );
   }
 })();
