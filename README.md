@@ -16,7 +16,6 @@ pnpm start
     1. Include date and time.
     2. Be an array: `breaks: [{startAt: '2023-03-22T08:00:00+00:00', endAt: '2023-03-22T08:00:00+00:00'}]` to avoide `00:00:00` entries and allowm more than 4 breaks, making the system more dynamic.
   - All date time fields should be in ISO 8601 format (https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/toISOString).
-- What if start is some odd time, ex 18:55. Then it's not good to keep adding 15 mins based on the start. Then we need to reset the cursor after every break to start at the break end.
 
 ---
 
