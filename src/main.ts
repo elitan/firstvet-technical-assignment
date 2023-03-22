@@ -58,12 +58,12 @@ const FILE_PATH = "./data.json";
     }
 
     // calculate available slots
-    let cursorDate = scheduleStartAt;
+    let dateCursor = scheduleStartAt;
 
-    while (cursorDate < scheduleEndAt) {
+    while (dateCursor < scheduleEndAt) {
       // get current slot start and end date and time
-      const slotStartAt = cursorDate;
-      const slotEndAt = addMinutes(cursorDate, MEETING_DURATION);
+      const slotStartAt = dateCursor;
+      const slotEndAt = addMinutes(dateCursor, MEETING_DURATION);
 
       // if slot end time is after schedule end time, stop
       if (slotEndAt > scheduleEndAt) {
@@ -90,10 +90,10 @@ const FILE_PATH = "./data.json";
         });
 
         // move cursor to end of the slot
-        cursorDate = slotEndAt;
+        dateCursor = slotEndAt;
       } else {
         // move cursor to end of the break it overlaps with
-        cursorDate = overlapsWithBreak.end;
+        dateCursor = overlapsWithBreak.end;
       }
     }
   }
@@ -104,9 +104,10 @@ const FILE_PATH = "./data.json";
   // print available slots
   for (const slot of availableSlots) {
     console.log(
-      `${format(slot.start, "yyyy-MM-dd HH:mm")} - ${format(
+      `${format(slot.start, "yyyy-MM-dd HH:mm", { locale: sv })} - ${format(
         slot.end,
-        "HH:mm"
+        "HH:mm",
+        { locale: sv }
       )} ${slot.employeeName} (${slot.employeeId})`
     );
   }
