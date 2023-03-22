@@ -1,4 +1,5 @@
 export interface Schedule {
+  [key: string]: string; // required to dynamically access properties
   scheduleId: number;
   startDate: string;
   startTime: string;

@@ -1,5 +1,20 @@
 # FirstVet Technical Assignment
 
+## Improvements
+
+- API
+  - `shceduleId` could be renamed to `id` as this is presumably an array of `schedule`.
+  - `[start|end]Date` can be combined in a single `[start|end]At` with combined date and time.
+  - Breaks should:
+    1. Include date and time.
+    2. Be an array: `breaks: [{startAt: '2023-03-22T08:00:00+00:00', endAt: '2023-03-22T08:00:00+00:00'}]` to avoide `00:00:00` entries and allowm more than 4 breaks, making the system more dynamic.
+  - All date time fields should be in ISO 8601 format (https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/toISOString).
+- What if start is some odd time, ex 18:55. Then it's not good to keep adding 15 mins based on the start. Then we need to reset the cursor after every break to start at the break end.
+
+---
+
+## Task
+
 At FirstVet, working schedules for veterinarians are sometimes managed in an external workforce scheduling tool and brought into FirstVet via an integration.
 In this hypothetical scenario, we want to integrate with such a tool. This third-party tool exposes a file based API where schedules are defined in files on the following JSON format:
 
